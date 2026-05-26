@@ -563,8 +563,14 @@ public class DisplayRotation {
         if (DisplayRotationCoordinator.isSecondaryInternalDisplay(mDisplayContent)
                 && mDeviceStateController
                         .shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay()) {
-            rotation = RotationUtils.reverseRotationDirectionAroundZAxis(
-                    mDisplayRotationCoordinator.getDefaultDisplayCurrentRotation());
+            rotation = mDisplayRotationCoordinator.getDefaultDisplayCurrentRotation();
+            if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
+                rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
+            }
+            int offset = mDeviceStateController.getSecondaryInternalDisplayRotationOffset();
+            if (offset != Surface.ROTATION_0) {
+                rotation = (rotation + offset) % 4;
+            }
         }
 
         ProtoLog.v(WM_DEBUG_ORIENTATION,

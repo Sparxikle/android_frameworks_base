@@ -1074,6 +1074,8 @@
          TODO(b/265991392): This should eventually be configured and parsed in
           display_settings.xml -->
     <bool name="config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay">false</bool>
+    <!-- Secondary internal display rotation offset (0, 90, 180, 270) -->
+    <integer name="config_secondaryInternalDisplayRotationOffset">0</integer>
 
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">

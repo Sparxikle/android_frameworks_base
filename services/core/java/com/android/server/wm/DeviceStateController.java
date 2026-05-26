@@ -32,6 +32,7 @@ import android.hardware.devicestate.feature.flags.FeatureFlags;
 import android.hardware.devicestate.feature.flags.FeatureFlagsImpl;
 import android.util.ArrayMap;
 import android.util.Pair;
+import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -72,6 +73,7 @@ final class DeviceStateController {
     final Map<DeviceStateListener, Executor> mDeviceStateCallbacks = new ArrayMap<>();
 
     private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
+    private final int mSecondaryInternalDisplayRotationOffset;
 
     @NonNull
     private DeviceStateEnum mCurrentDeviceStateEnum = DeviceStateEnum.UNKNOWN;
@@ -142,6 +144,8 @@ final class DeviceStateController {
         mMatchBuiltInDisplayOrientationToDefaultDisplay = context.getResources()
                 .getBoolean(R.bool
                         .config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay);
+        mSecondaryInternalDisplayRotationOffset = context.getResources()
+                .getInteger(R.integer.config_secondaryInternalDisplayRotationOffset);
     }
 
     /**
@@ -176,9 +180,6 @@ final class DeviceStateController {
      * display.
      */
     boolean shouldReverseRotationDirectionAroundZAxis(@NonNull DisplayContent displayContent) {
-        if (!displayContent.isDefaultDisplay) {
-            return false;
-        }
         return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
     }
 
@@ -189,6 +190,14 @@ final class DeviceStateController {
         // TODO(b/265991392): This should come from display_settings.xml once it's easier to
         //  extend with complex configurations.
         return mMatchBuiltInDisplayOrientationToDefaultDisplay;
+    }
+
+    /**
+     * @return the rotation offset for secondary internal displays.
+     */
+    @Surface.Rotation
+    int getSecondaryInternalDisplayRotationOffset() {
+        return mSecondaryInternalDisplayRotationOffset;
     }
 
     /**

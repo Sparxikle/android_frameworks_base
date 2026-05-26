@@ -190,11 +190,13 @@ public class Layout {
                 throw new IllegalArgumentException("Cannot find a lead display whose address is "
                         + leadDisplayAddress);
             }
+            /*
             if (!TextUtils.equals(display.getDisplayGroupName(),
                     leadDisplay.getDisplayGroupName())) {
                 throw new IllegalArgumentException("Lead display(" + leadDisplay + ") should be in "
                         + "the same display group of the display(" + display + ")");
             }
+            */
             if (hasCyclicLeadDisplay(display)) {
                 throw new IllegalArgumentException("Display(" + display + ") has a cyclic lead "
                         + "display");

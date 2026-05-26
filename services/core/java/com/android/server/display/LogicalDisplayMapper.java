@@ -27,6 +27,7 @@ import static com.android.server.display.DeviceStateToLayoutMap.STATE_DEFAULT;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
 import static com.android.server.display.DisplayGroupAllocator.GROUP_TYPE_PRIMARY;
 import static com.android.server.display.DisplayGroupAllocator.REASON_EXTENDED;
+import static com.android.server.display.DisplayGroupAllocator.REASON_NON_DESKTOP;
 import static com.android.server.display.DisplayGroupAllocator.REASON_PROJECTED;
 import static com.android.server.display.DisplayGroupAllocator.calculateGroupId;
 import static com.android.server.display.layout.Layout.DEFAULT_DISPLAY_GROUP_NAME;
@@ -1136,7 +1137,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             if (groupId != Display.DEFAULT_DISPLAY_GROUP
                     && (displayDeviceInfo.type == Display.TYPE_INTERNAL
                             || displayDeviceInfo.type == Display.TYPE_EXTERNAL)
-                    && (reason == REASON_PROJECTED || reason == REASON_EXTENDED)) {
+                    && (reason == REASON_PROJECTED || reason == REASON_EXTENDED
+                            || (mSupportsConcurrentInternalDisplays && reason == REASON_NON_DESKTOP))) {
                 newGroup.setFlags(DisplayGroup.FLAG_DEFAULT_GROUP_ADJACENT);
             }
         }

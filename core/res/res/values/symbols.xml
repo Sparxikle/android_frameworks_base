@@ -3784,6 +3784,7 @@
        TODO(b/265991392): This should eventually be configured and parsed in
         display_settings.xml -->
   <java-symbol type="bool" name="config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay" />
+  <java-symbol type="integer" name="config_secondaryInternalDisplayRotationOffset" />
 
   <!-- Default user restrictions for the SYSTEM user -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />

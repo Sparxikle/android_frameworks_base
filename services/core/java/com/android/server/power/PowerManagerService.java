@@ -2295,9 +2295,23 @@ public final class PowerManagerService extends SystemService
             if (groupId == Display.INVALID_DISPLAY_GROUP) {
                 return;
             }
-            if (userActivityNoUpdateLocked(mPowerGroups.get(groupId), eventTime, event, flags,
-                    uid)) {
-                updatePowerStateLocked();
+            PowerGroup powerGroup = mPowerGroups.get(groupId);
+            if (powerGroup != null) {
+                boolean changed = userActivityNoUpdateLocked(powerGroup, eventTime, event, flags,
+                        uid);
+                if (powerGroup.isDefaultOrAdjacentGroup()) {
+                    for (int i = 0; i < mPowerGroups.size(); i++) {
+                        PowerGroup pg = mPowerGroups.valueAt(i);
+                        if (pg != powerGroup && pg.isDefaultOrAdjacentGroup()) {
+                            if (userActivityNoUpdateLocked(pg, eventTime, event, flags, uid)) {
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+                if (changed) {
+                    updatePowerStateLocked();
+                }
             }
         }
     }

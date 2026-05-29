@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
 /**
  * Holds a collection of {@link Display}s. A single instance of this class describes
  * how to organize one or more DisplayDevices into LogicalDisplays for a particular device
@@ -38,6 +39,9 @@ import java.util.Objects;
  * a foldable device is folded, and a second instance for when the device is unfolded.
  */
 public class Layout {
+
+    private static final boolean IS_WINGLM = "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""));
+
     public static final String DEFAULT_DISPLAY_GROUP_NAME = "";
 
     private static final String TAG = "Layout";
@@ -190,13 +194,12 @@ public class Layout {
                 throw new IllegalArgumentException("Cannot find a lead display whose address is "
                         + leadDisplayAddress);
             }
-            /*
-            if (!TextUtils.equals(display.getDisplayGroupName(),
-                    leadDisplay.getDisplayGroupName())) {
-                throw new IllegalArgumentException("Lead display(" + leadDisplay + ") should be in "
-                        + "the same display group of the display(" + display + ")");
+            if (!IS_WINGLM) {
+                if (!TextUtils.equals(display.getDisplayGroupName(), leadDisplay.getDisplayGroupName())) {
+                    throw new IllegalArgumentException("Lead display(" + leadDisplay + ") should be in "
+                            + "the same display group of the display(" + display + ")");
+                }
             }
-            */
             if (hasCyclicLeadDisplay(display)) {
                 throw new IllegalArgumentException("Display(" + display + ") has a cyclic lead "
                         + "display");

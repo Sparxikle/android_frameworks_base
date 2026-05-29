@@ -73,6 +73,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+
 /**
  * Responsible for creating {@link LogicalDisplay}s and associating them to the
  * {@link DisplayDevice} objects supplied through {@link DisplayAdapter.Listener}.
@@ -85,6 +86,9 @@ import java.util.function.Predicate;
  * {@link LogicalDisplay}s can be remapped to different {@link DisplayDevice}s.
  */
 class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
+
+    private static final boolean IS_WINGLM = "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""));
+
     private static final String TAG = "LogicalDisplayMapper";
 
     // To enable these logs, run:
@@ -1138,7 +1142,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                     && (displayDeviceInfo.type == Display.TYPE_INTERNAL
                             || displayDeviceInfo.type == Display.TYPE_EXTERNAL)
                     && (reason == REASON_PROJECTED || reason == REASON_EXTENDED
-                            || (mSupportsConcurrentInternalDisplays && reason == REASON_NON_DESKTOP))) {
+                            || ( IS_WINGLM && mSupportsConcurrentInternalDisplays && reason == REASON_NON_DESKTOP))) {
                 newGroup.setFlags(DisplayGroup.FLAG_DEFAULT_GROUP_ADJACENT);
             }
         }

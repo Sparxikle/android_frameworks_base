@@ -174,12 +174,16 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
+
 /**
  * The power manager service is responsible for coordinating power management
  * functions on the device.
  */
 public final class PowerManagerService extends SystemService
         implements Watchdog.Monitor {
+
+    private static final boolean IS_WINGLM = "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""));
+
     private static final String TAG = "PowerManagerService";
 
     private static final boolean DEBUG = false;
@@ -2299,7 +2303,7 @@ public final class PowerManagerService extends SystemService
             if (powerGroup != null) {
                 boolean changed = userActivityNoUpdateLocked(powerGroup, eventTime, event, flags,
                         uid);
-                if (powerGroup.isDefaultOrAdjacentGroup()) {
+                if (IS_WINGLM && powerGroup.isDefaultOrAdjacentGroup()) {
                     for (int i = 0; i < mPowerGroups.size(); i++) {
                         PowerGroup pg = mPowerGroups.valueAt(i);
                         if (pg != powerGroup && pg.isDefaultOrAdjacentGroup()) {

@@ -46,11 +46,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+
 /**
  * Class that listens for a callback from display manager and responds to device state
  * changes.
  */
 final class DeviceStateController {
+
+    private static final boolean IS_WINGLM = "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""));
 
     // Used to synchronize WindowManager services call paths with DeviceStateManager's callbacks.
     @NonNull
@@ -180,6 +183,9 @@ final class DeviceStateController {
      * display.
      */
     boolean shouldReverseRotationDirectionAroundZAxis(@NonNull DisplayContent displayContent) {
+      if (!IS_WINGLM && !displayContent.isDefaultDisplay) {
+          return false;
+      }
         return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
     }
 

@@ -95,11 +95,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.Set;
 
+
 /**
  * Defines the mapping between orientation and rotation of a display.
  * Non-public methods are assumed to run inside WM lock.
  */
 public class DisplayRotation {
+    
+    private static final boolean IS_WINGLM = "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""));
+
     public static final int USE_CURRENT_ROTATION = -1;
     public static final int NO_UPDATE_USER_ROTATION = -2;
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayRotation" : TAG_WM;
@@ -564,14 +568,18 @@ public class DisplayRotation {
                 && mDeviceStateController
                         .shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay()) {
             rotation = mDisplayRotationCoordinator.getDefaultDisplayCurrentRotation();
-            if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
-                rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
+            if (IS_WINGLM){
+              if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
+                  rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
+              }
+              int offset = mDeviceStateController.getSecondaryInternalDisplayRotationOffset();
+              if (offset != Surface.ROTATION_0) {
+                  rotation = (rotation + offset) % 4;
+              }
+            } else {
+               rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
             }
-            int offset = mDeviceStateController.getSecondaryInternalDisplayRotationOffset();
-            if (offset != Surface.ROTATION_0) {
-                rotation = (rotation + offset) % 4;
-            }
-        }
+          }
 
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Computed rotation=%s (%d) for display id=%d based on lastOrientation=%s (%d) and "

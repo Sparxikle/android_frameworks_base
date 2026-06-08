@@ -29,6 +29,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -67,6 +68,8 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
 
     private final PersistInfoProvider mPersistInfoProvider;
     final boolean mOnlyCacheLowResSnapshot;
+
+    private static final boolean IS_WINGLM = "winglm".equals(SystemProperties.get("ro.product.device", ""));
 
     TaskSnapshotController(WindowManagerService service, SnapshotPersistQueue persistQueue) {
         super(service);
@@ -466,6 +469,15 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
      */
     void screenTurningOff(int displayId, ScreenOffListener listener) {
         if (shouldDisableSnapshots()) {
+            listener.onScreenOff();
+            return;
+        }
+
+        if (IS_WINGLM && displayId == 130) {
+            // Winglm: take snapshot immediately for swivel screen to avoid blank preview
+            synchronized (mService.mGlobalLock) {
+                snapshotForSleeping(displayId);
+            }
             listener.onScreenOff();
             return;
         }

@@ -1295,7 +1295,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                             displayLayout.getRefreshRateThermalThrottlingMapId()
                     )
             );
-            setEnabledLocked(newDisplay, displayLayout.isEnabled());
+            boolean isEnabled = displayLayout.isEnabled();
+            if (IS_WINGLM && logicalDisplayId == 130) {
+                isEnabled = true;
+            }
+            setEnabledLocked(newDisplay, isEnabled);
             newDisplay.setThermalBrightnessThrottlingDataIdLocked(
                     displayLayout.getThermalBrightnessThrottlingMapId() == null
                             ? DisplayDeviceConfig.DEFAULT_ID

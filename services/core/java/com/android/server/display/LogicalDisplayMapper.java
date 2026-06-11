@@ -264,7 +264,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mFoldSettingProvider = foldSettingProvider;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mSupportsConcurrentInternalDisplays = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_supportsConcurrentInternalDisplays);
+                com.android.internal.R.bool.config_supportsConcurrentInternalDisplays) ||
+                context.getResources().getBoolean(
+                com.android.internal.R.bool.config_keepSecondaryInternalDisplayEnabled);
         mDeviceStatesOnWhichToWakeUp = toSparseBooleanArray(context.getResources().getIntArray(
                 com.android.internal.R.array.config_deviceStatesOnWhichToWakeUp));
         mDeviceStatesOnWhichToSelectiveSleep = toSparseBooleanArray(
@@ -877,6 +879,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             } else if (wasPreviouslyEnabled != isCurrentlyEnabled) {
                 int event = isCurrentlyEnabled ? LOGICAL_DISPLAY_EVENT_ADDED :
                         LOGICAL_DISPLAY_EVENT_REMOVED;
+                if (!isCurrentlyEnabled && mSupportsConcurrentInternalDisplays &&
+                        display.getDisplayInfoLocked().type == Display.TYPE_INTERNAL &&
+                        displayId != DEFAULT_DISPLAY) {
+                    event = LOGICAL_DISPLAY_EVENT_BASIC_CHANGED;
+                }
                 logicalDisplayEventMask |= event;
             } else if (wasDirty) {
                 // If only the hdr/sdr ratio changed, then send just the event for that case

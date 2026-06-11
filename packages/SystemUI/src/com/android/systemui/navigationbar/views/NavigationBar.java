@@ -1389,6 +1389,16 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @VisibleForTesting
     boolean onHomeTouch(View v, MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
+            final int currentDisplayId = mDisplayId;
+            mHandler.post(() -> {
+                try {
+                    android.os.SystemProperties.set("sys.winglm.recent_display", String.valueOf(currentDisplayId));
+                } catch (Exception e) {
+                    Log.e("WING_DEBUG", "Failed to set sys.winglm.recent_display in onHomeTouch", e);
+                }
+            });
+        }
         if (mHomeBlockedThisTouch && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
             return true;
         }
@@ -1512,6 +1522,16 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private void onRecentsClick(View v) {
         mNavBarButtonClickLogger.logRecentsButtonClick();
+        if ("winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
+            final int currentDisplayId = mDisplayId;
+            mHandler.post(() -> {
+                try {
+                    android.os.SystemProperties.set("sys.winglm.recent_display", String.valueOf(currentDisplayId));
+                } catch (Exception e) {
+                    Log.e("WING_DEBUG", "Failed to set sys.winglm.recent_display", e);
+                }
+            });
+        }
 
         if (LatencyTracker.isEnabled(mContext)) {
             LatencyTracker.getInstance(mContext).onActionStart(

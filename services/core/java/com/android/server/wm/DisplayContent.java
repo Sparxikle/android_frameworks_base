@@ -6487,6 +6487,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     private void clearAllTasksOnDisplay(@Nullable Runnable clearTasksCallback,
             boolean isRemovingDisplay) {
+        if ("winglm".equals(android.os.SystemProperties.get("ro.product.device", "")) &&
+                mDisplayId != DEFAULT_DISPLAY &&
+                mDisplay.getType() == android.view.Display.TYPE_INTERNAL &&
+                mWmService.mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_keepSecondaryInternalDisplayEnabled)) {
+            android.util.Slog.i("WING_DEBUG", "Skipping clearAllTasksOnDisplay for winglm internal secondary display " + mDisplayId);
+            if (clearTasksCallback != null) {
+                clearTasksCallback.run();
+            }
+            return;
+        }
         Task lastReparentedRootTask;
         mRootWindowContainer.mTaskSupervisor.beginDeferResume();
         try {

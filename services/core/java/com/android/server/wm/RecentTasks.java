@@ -1507,7 +1507,12 @@ class RecentTasks {
         // Recents.
         if (task.getDisplayContent() != null
                 && !task.getDisplayContent().canShowTasksInHostDeviceRecents()) {
-            return false;
+            if ("winglm".equals(android.os.SystemProperties.get("ro.product.device", "")) &&
+                    task.getDisplayContent().mDisplay.getType() == android.view.Display.TYPE_INTERNAL) {
+                // Allow winglm internal secondary displays
+            } else {
+                return false;
+            }
         }
 
         return true;

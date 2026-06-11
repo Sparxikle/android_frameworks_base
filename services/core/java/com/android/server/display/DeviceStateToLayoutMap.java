@@ -71,6 +71,8 @@ class DeviceStateToLayoutMap {
 
     private final SparseArray<Layout> mLayoutMap = new SparseArray<>();
     private final DisplayIdProducer mIdProducer;
+    private final java.util.Map<DisplayAddress, Integer> mAddressToIdMap = new java.util.HashMap<>();
+    private DisplayAddress mCurrentAddress = null;
 
     DeviceStateToLayoutMap(DisplayIdProducer idProducer, DisplayManagerFlags flags) {
         this(idProducer, flags, getConfigFile());
@@ -78,7 +80,17 @@ class DeviceStateToLayoutMap {
 
     DeviceStateToLayoutMap(DisplayIdProducer idProducer, DisplayManagerFlags flags,
             File configFile) {
-        mIdProducer = idProducer;
+        mIdProducer = (isDefault) -> {
+            if (isDefault) return 0;
+            if (mCurrentAddress != null && mAddressToIdMap.containsKey(mCurrentAddress)) {
+                return mAddressToIdMap.get(mCurrentAddress);
+            }
+            int id = idProducer.getId(isDefault);
+            if (mCurrentAddress != null) {
+                mAddressToIdMap.put(mCurrentAddress, id);
+            }
+            return id;
+        };
         loadLayoutsFromConfig(configFile);
         createLayout(STATE_DEFAULT, DEFAULT_LAYOUT_NAME);
     }
@@ -153,6 +165,7 @@ class DeviceStateToLayoutMap {
                     DisplayAddress leadDisplayAddress = leadDisplayPhysicalId == null ? null
                             : DisplayAddress.fromPhysicalDisplayId(
                                     leadDisplayPhysicalId.longValue());
+                    mCurrentAddress = address;
                     layout.createDisplayLocked(
                             address,
                             d.isDefaultDisplay(),
@@ -165,6 +178,7 @@ class DeviceStateToLayoutMap {
                             d.getRefreshRateZoneId(),
                             d.getRefreshRateThermalThrottlingMapId(),
                             d.getPowerThrottlingMapId());
+                    mCurrentAddress = null;
                 }
                 layout.postProcessLocked();
             }

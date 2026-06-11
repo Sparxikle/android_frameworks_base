@@ -24,6 +24,11 @@
      entries do not follow the convention, but all new entries should. -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Whether to keep secondary internal displays enabled even when they are not the default
+         display and are logically disabled by the device state. This prevents activities from
+         being moved to the default display when the secondary display is "disabled" (e.g. swivel closed). -->
+    <bool name="config_keepSecondaryInternalDisplayEnabled">true</bool>
+
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">

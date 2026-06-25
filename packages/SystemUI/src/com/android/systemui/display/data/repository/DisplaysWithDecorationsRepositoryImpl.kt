@@ -49,6 +49,9 @@ constructor(
         val callback =
             object : CommandQueue.Callbacks {
                 override fun onDisplayAddSystemDecorations(displayId: Int) {
+                    if (displayId != android.view.Display.DEFAULT_DISPLAY) {
+                        return
+                    }
                     if (ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
                         trySend(Event.Add(displayId))
                     } else {
@@ -68,7 +71,7 @@ constructor(
 
     private val initialDisplayIdsWithDecorations: Set<Int> =
         displayRepository.displayIds.value
-            .filter { windowManager.shouldShowSystemDecors(it) }
+            .filter { it == android.view.Display.DEFAULT_DISPLAY && windowManager.shouldShowSystemDecors(it) }
             .toSet()
 
     /**

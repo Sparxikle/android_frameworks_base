@@ -639,6 +639,9 @@ public class NavigationBarView extends FrameLayout {
         boolean disableBack = !isBackDismissIme && (mEdgeBackGestureHandler.isHandlingGestures()
                 || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0))
                 || isImeRenderingNavButtons();
+        if (!QuickStepContract.isGesturalMode(mNavBarMode)) {
+            disableBack = (mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0;
+        }
 
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
@@ -679,8 +682,7 @@ public class NavigationBarView extends FrameLayout {
 
     @VisibleForTesting
     boolean isRecentsButtonDisabled() {
-        return mUseCarModeUi || !isOverviewEnabled()
-                || getContext().getDisplayId() != mDisplayTracker.getDefaultDisplayId();
+        return mUseCarModeUi || !isOverviewEnabled();
     }
 
     private Display getContextDisplay() {

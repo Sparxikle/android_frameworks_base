@@ -1390,14 +1390,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     @VisibleForTesting
     boolean onHomeTouch(View v, MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
-            final int currentDisplayId = mDisplayId;
-            mHandler.post(() -> {
-                try {
-                    android.os.SystemProperties.set("sys.winglm.recent_display", String.valueOf(currentDisplayId));
-                } catch (Exception e) {
-                    Log.e("WING_DEBUG", "Failed to set sys.winglm.recent_display in onHomeTouch", e);
-                }
-            });
+            try {
+                android.os.SystemProperties.set("sys.winglm.recent_display", String.valueOf(mDisplayId));
+            } catch (Exception e) {
+                Log.e("WING_DEBUG", "Failed to set sys.winglm.recent_display synchronously in onHomeTouch", e);
+            }
         }
         if (mHomeBlockedThisTouch && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
             return true;
@@ -1473,6 +1470,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             case MotionEvent.ACTION_CANCEL:
                 mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
                 centralSurfacesOptional.ifPresent(CentralSurfaces::awakenDreams);
+                if (event.getActionMasked() == MotionEvent.ACTION_UP && mDisplayId == 1 && "winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
+                    if (mLauncherProxyService.getProxy() != null) {
+                        try {
+                            mLauncherProxyService.getProxy().onOverviewHidden(false, true);
+                        } catch (android.os.RemoteException e) {
+                            Log.e(TAG, "Failed to send overview hide event to launcher on winglm display 1", e);
+                        }
+                    }
+                }
                 break;
         }
         return false;
@@ -1523,14 +1529,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private void onRecentsClick(View v) {
         mNavBarButtonClickLogger.logRecentsButtonClick();
         if ("winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
-            final int currentDisplayId = mDisplayId;
-            mHandler.post(() -> {
-                try {
-                    android.os.SystemProperties.set("sys.winglm.recent_display", String.valueOf(currentDisplayId));
-                } catch (Exception e) {
-                    Log.e("WING_DEBUG", "Failed to set sys.winglm.recent_display", e);
-                }
-            });
+            Log.e("WING_DEBUG", "onRecentsClick: mDisplayId=" + mDisplayId);
+            try {
+                android.os.SystemProperties.set("sys.winglm.recent_display", String.valueOf(mDisplayId));
+            } catch (Exception e) {
+                Log.e("WING_DEBUG", "Failed to set sys.winglm.recent_display synchronously", e);
+            }
         }
 
         if (LatencyTracker.isEnabled(mContext)) {
@@ -1538,7 +1542,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
         }
         mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::awakenDreams);
-        mCommandQueue.toggleRecentApps();
+        if ("winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
+            mRecentsOptional.ifPresent(Recents::toggleRecentApps);
+        } else {
+            mCommandQueue.toggleRecentApps();
+        }
     }
 
     @VisibleForTesting

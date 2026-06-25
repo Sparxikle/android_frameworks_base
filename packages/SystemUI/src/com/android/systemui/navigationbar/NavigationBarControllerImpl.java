@@ -31,6 +31,7 @@ import android.os.Trace;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
@@ -230,6 +231,9 @@ public class NavigationBarControllerImpl implements
      */
     @Override
     public boolean canCreateNavBarOrTaskBar(int displayId) {
+        if (displayId != mDisplayTracker.getDefaultDisplayId()) {
+            return false;
+        }
         if (mHasNavBarOrTaskbar.indexOfKey(displayId) > -1) {
             return mHasNavBarOrTaskbar.get(displayId);
         }
@@ -349,12 +353,14 @@ public class NavigationBarControllerImpl implements
 
                 @Override
                 public void onDisplayRemoveSystemDecorations(int displayId) {
+                    mNavBarHelper.getEdgeBackGestureHandler().onDisplayRemoveSystemDecorations(displayId);
                     removeNavigationBar(displayId);
                     mHasNavBarOrTaskbar.delete(displayId);
                 }
 
                 @Override
                 public void onDisplayAddSystemDecorations(int displayId) {
+                    mNavBarHelper.getEdgeBackGestureHandler().onDisplayAddSystemDecorations(displayId);
                     if (DesktopExperienceFlags.ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT.isTrue()) {
                         updateHasNavBarForDisplay(displayId);
                     }
@@ -430,7 +436,7 @@ public class NavigationBarControllerImpl implements
 
         final Context context = isOnDefaultDisplay
                 ? mContext
-                : mContext.createDisplayContext(display);
+                : new ContextThemeWrapper(mContext.createDisplayContext(display), mContext.getThemeResId());
 
         NavigationBarComponent component = mNavigationBarComponentFactory.create(
                 context, savedState);

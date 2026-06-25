@@ -89,6 +89,10 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
             final Runnable toggleRecents = () -> {
                 try {
                     if (mLauncherProxyService.getProxy() != null) {
+                        if ("winglm".equals(android.os.SystemProperties.get("ro.product.device", ""))) {
+                            Log.e(TAG, "toggleRecentApps on winglm: sys.winglm.recent_display=" +
+                                android.os.SystemProperties.get("sys.winglm.recent_display", "unknown"));
+                        }
                         mLauncherProxyService.getProxy().onOverviewToggle();
                         mLauncherProxyService.notifyToggleRecentApps();
                     }
